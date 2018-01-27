@@ -1,0 +1,15 @@
+{
+    "screen_settings": {
+        "width": 1920,
+        "height": 1080
+    },
+    "camera_settings": {
+        "_comment": "automatic 0 = clicking points manually; 1 = automated",
+        "automatic": 0,
+        "camera_index": 0,
+        "homography_file": "homography.p",
+        "desired_width": 960,
+        "desired_height": 540
+    },
+    "title": "smARtable"
+}
