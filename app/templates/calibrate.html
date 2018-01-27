@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html width="{{ screen_width }}" height="{{ screen_height }}" >
+
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='calibrate_style.css')}}">
+
+
+<body width="{{ screen_width }}" height="{{ screen_height }}" >
+  <canvas id="myCanvas" width="{{ screen_width }}" height="{{ screen_height }}"></canvas>
+</body>
+
+<script>
+
+  var screen_width = '{{ screen_width }}';
+  var screen_height = '{{ screen_height }}';
+
+  var canvas = document.getElementById("myCanvas");
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#FFFFFF";
+
+  var tl = [Math.floor(screen_width/4), Math.floor(screen_height/4)];
+  var tr = [Math.floor(3*screen_width/4), Math.floor(screen_height/4)];
+  var bl = [Math.floor(screen_width/4), Math.floor(3*screen_height/4)];
+  var br = [Math.floor(3*screen_width/4), Math.floor(3*screen_height/4)];
+
+  console.log(tl);
+
+  var radius = '{{ target_size }}';
+
+  // set up the targets to click
+  ctx.beginPath();
+  ctx.arc(tl[0],tl[1],radius,0,2*Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(tr[0],tr[1],radius,0,2*Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(bl[0],bl[1],radius,0,2*Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(br[0],br[1],radius,0,2*Math.PI);
+  ctx.fill();
+
+  // write text over those targets
+  ctx.fillStyle = "#FF0000";
+  ctx.font = "{{ target_size }}px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline="middle";
+  ctx.fillText("0",tl[0],tl[1]);
+  ctx.fillText("1",tr[0],tr[1]);
+  ctx.fillText("2",bl[0],bl[1]);
+  ctx.fillText("3",br[0],br[1]);
+
+</script>
+
+</html>

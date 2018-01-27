@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html width="{{ screen_width }}" height="{{ screen_height }}" >
+
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='calibrate_style.css')}}">
+
+
+<body width="{{ screen_width }}" height="{{ screen_height }}" >
+  <canvas id="myCanvas" width="{{ screen_width }}" height="{{ screen_height }}"></canvas>
+</body>
+
+<!-- we can add a callback and drawing stuff here -->
+<script>
+  // example drawing a white block
+  var canvas = document.getElementById("myCanvas");
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(10,10,500,500);
+</script>
+
+</html>
