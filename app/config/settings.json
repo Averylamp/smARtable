@@ -1,13 +1,14 @@
 {
     "screen_settings": {
-        "width": 1920,
-        "height": 1080,
+        "width": 1360,
+        "height": 768,
         "target_size": 100
     },
     "camera_settings": {
         "_comment": "automatic 0 = clicking points manually; 1 = automated",
         "automatic": 0,
-        "camera_index": 0,
+        "camera_index": 1,
+        "camera_name": "main_camera",
         "homography_file": "config/homography.p",
         "desired_width": 960,
         "desired_height": 540
