@@ -61,7 +61,6 @@ def get_google_analysis(image_filename):
     response = requests.post(url='https://vision.googleapis.com/v1/images:annotate?key=AIzaSyBgalC41vkCLty97Je2bmgd9nXH8GeIyJA', data=data, headers={'Content-Type': 'application/json'})
     
     response_json = response.json()["responses"][0]
-
     results = {}
 
     if "cropHintsAnnotation" in response_json:
@@ -80,13 +79,13 @@ def get_google_analysis(image_filename):
     items = set()
 
     if "labelAnnotations" in response_json:    
-        entities = list(functools.reduce(lambda a, b: a + b ,map(lambda x: x.get("description").lower().split(" "), response_json["labelAnnotations"])))
+        entities = list(functools.reduce(lambda a, b: a + b ,map(lambda x: x.get("description").lower().split(" "), filter(lambda d: "description" in d, response_json["labelAnnotations"]))))
         items.update(entities)
         best_guess = response_json["labelAnnotations"][0]["description"]
 
     if "webDetection" in response_json:
         if "webEntities" in response_json["webDetection"]:
-            entities = list(functools.reduce(lambda a, b: a + b ,map(lambda x: x.get("description").lower().split(" "), response_json["webDetection"]["webEntities"])))
+            entities = list(functools.reduce(lambda a, b: a + b ,map(lambda x: x.get("description").lower().split(" "), filter(lambda d: "description" in d, response_json["webDetection"]["webEntities"]))))
             items.update(entities)
         if "bestGuessLabels" in response_json["webDetection"]:
             best_guess = response_json["webDetection"]["bestGuessLabels"][0]["label"]
