@@ -10,6 +10,8 @@
         "camera_index": 1,
         "camera_name": "main_camera",
         "homography_file": "config/homography.p",
+        "inv_homography_file": "config/inv_homography.p",
+        "background_subtract": "computer_vision/background.png",
         "desired_width": 960,
         "desired_height": 540
     },

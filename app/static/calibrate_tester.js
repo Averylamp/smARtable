@@ -1,4 +1,5 @@
-setInterval(update_screen, 33);
+// setInterval(update_screen, 33);
+setInterval(update_screen, 1000);
 
 function update_screen() {
   $.getJSON($SCRIPT_ROOT + '/get_point', {
@@ -8,11 +9,15 @@ function update_screen() {
       var canvas = document.getElementById("myCanvas");
       var ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#FFFFFF";
+      // ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
-      ctx.arc(point[0], point[1],50,0,2*Math.PI);
-      ctx.fill();
-      console.log(point)
+      var radius = 100;
+      ctx.arc(point[0],point[1],radius,0,2*Math.PI);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.stroke();
+      // ctx.fill();
+      // console.log(point);
     };
   });
 }

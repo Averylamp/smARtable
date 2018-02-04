@@ -83,9 +83,12 @@ while M is None:
             [(SCREEN_WIDTH/2.0)+w_size,(SCREEN_HEIGHT/2.0)+h_size]])
 
         M = cv2.getPerspectiveTransform(pts1,pts2)
+        M_inv = cv2.getPerspectiveTransform(pts2,pts1)
         filename = json_settings["camera_settings"]["homography_file"]
+        inv_filename = json_settings["camera_settings"]["inv_homography_file"]
         pickle.dump(M, open(filename, "wb"))
-        print("Saving {} and exiting.".format(filename))
+        pickle.dump(M_inv, open(inv_filename, "wb"))
+        print("Saving {} and {} and exiting.".format(filename, inv_filename))
 
 # When everything done, release everything
 capture_object.release()
