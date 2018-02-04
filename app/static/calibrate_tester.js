@@ -10,7 +10,7 @@ function update_screen() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
-      ctx.arc(point[0], point[1],50,0,2*Math.PI);
+      ctx.arc(point[0], point[1],5,0,2*Math.PI);
       ctx.fill();
       console.log(point)
     };

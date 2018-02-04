@@ -8,6 +8,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
 
+camera = CameraObject(json_settings["camera_settings"])
+
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
 SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
@@ -37,8 +39,18 @@ def get_point():
     if LAST_CLICKED_POSITION is not None:
         point = [LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
-        point = [-1,-1]
+        # point = [2,2]
+        point = camera.get_box_of_interest()
+        if point is None:
+            point = [2,2]
     return jsonify(result=point)
+
+@app.route('/set_background/')
+def set_background():
+    ret, img = camera.grab_image()
+    cv2.imwrite(dir_path+"/background/{}.png".format(camera.camera_name), img)
+    return jsonify(result=ret)
+
 
 @app.route('/get_screen/')
 def get_screen():
