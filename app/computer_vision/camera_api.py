@@ -30,7 +30,6 @@ class CameraObject(object):
         self.last_clicked_position = None
 
         # create the mask
-
         ret, frame = self.grab_image()
         self.mask = np.zeros((len(frame),len(frame[0])), dtype=np.uint8) # height, width
         corners = []
@@ -81,29 +80,25 @@ class CameraObject(object):
                     output[i][j] = 0
         return output
 
-    def get_box_of_interest(self):
+    def get_box_of_interest(self, THRESH=10, KERNEL=(30,30)):
         background = cv2.imread("background/main_camera.png")
         ret, frame = self.grab_image()
 
-        # background = self.get_cropped_polgon_region(background, corners)
-        # frame = self.get_cropped_polgon_region(frame, corners)
-
         difference = np.absolute(np.subtract(frame, background))
-        difference = self.get_masked_section(difference, self.mask)
 
         # filter the image
-        kernel = np.ones((35,35),np.uint8)
+        kernel = np.ones(KERNEL,np.uint8)
         filtered = cv2.erode(difference,kernel,iterations=1)
-        kernel = np.ones((35,35),np.uint8)
         filtered = cv2.dilate(filtered,kernel,iterations=1)
 
         # convert to grayscale
         filtered = cv2.cvtColor(filtered, cv2.COLOR_BGR2GRAY)
 
         # set as 0 for this range
-        THRESH = 150
         filtered = np.where(np.logical_and(0<=filtered, filtered<=THRESH), 0, filtered)
-        filtered = np.where(np.logical_and(THRESH<=filtered, filtered<=255), 255, filtered)
+        filtered = np.where(np.logical_and(THRESH<filtered, filtered<=255), 255, filtered)
+
+        cv2.imwrite("detections/output.png", filtered)
 
         im2, contours, hierarchy = cv2.findContours(filtered,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
@@ -113,23 +108,38 @@ class CameraObject(object):
         for contour in contours:
             # get the bounding rect
             x, y, w, h = cv2.boundingRect(contour)
+
+            corners = []
+            corners.append(self.get_transformed_point(x,y))
+            corners.append(self.get_transformed_point(x,y+h))
+            corners.append(self.get_transformed_point(x+w,y))
+            corners.append(self.get_transformed_point(x+w,y+h))
+
+            valid_corners = True
+
+            # make sure it isn't off the screen
+            for corner in corners:
+                if corner[0] < 0 or corner[0] > 1360 or corner[1] < 0 or corner[1] > 768:
+                    valid_corners = False
+                    break
+
             size = w*h
             # for size
-            if size >= best_size:
-                    best_size = size
-                    best_contour = contour
-                    
+            if size >= best_size and valid_corners:
+                best_size = size
+                best_contour = contour
+
         # density based code
-        #     if size > 100:
-        #         density = 0.0
-        #         count = 0.0
-        #         for i in range(y,y+h):
-        #             for j in range(x,x+w):
-        #                 count += im2[i][j] / 255.0
-        #         density = count / (w*h)
-        #         if density >= best_density:
-        #             best_density = density
-        #             best_contour = contour
+            # if size > 100:
+            #     density = 0.0
+            #     count = 0.0
+            #     for i in range(y,y+h):
+            #         for j in range(x,x+w):
+            #             count += im2[i][j] / 255.0
+            #     density = count / (w*h)
+            #     if density >= best_density:
+            #         best_density = density
+            #         best_contour = contour
 
         if best_contour is not None:
             x, y, w, h = cv2.boundingRect(best_contour)
@@ -147,29 +157,6 @@ class CameraObject(object):
             return None
 
         # pass
-
-    def window_thread(self):
-        # create the windows
-        window_title = self.camera_name
-        # cv2.startWindowThread()
-        cv2.namedWindow(window_title)
-        cv2.setMouseCallback(window_title, self.mouse_listener)
-
-        ret, frame = self.grab_image()
-        cv2.imshow(window_title, frame)
-
-        while True:
-
-            k = cv2.waitKey(1) & 0xFF
-
-            # take picture and restart calibration
-            if k == ord("f"):
-                ret, frame = self.grab_image()
-                cv2.imshow(window_title, frame)
-
-            # q means quit
-            elif k == ord("q"):
-                break
 
     def get_latest_position(self):
         return self.last_clicked_position
