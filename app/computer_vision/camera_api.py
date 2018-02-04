@@ -156,7 +156,5 @@ class CameraObject(object):
         else:
             return None
 
-        # pass
-
     def get_latest_position(self):
         return self.last_clicked_position
