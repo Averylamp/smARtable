@@ -129,11 +129,13 @@ def calibrate():
                             target_size=TARGET_SIZE)
 
 def main_loop():
+    global cameras
     while True:
         print("working")
         socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
         # only update every X second(s)
-        r = info.get_product_info("hot cheetos")
+        s = get_item_class(cameras) 
+        r = info.get_product_info(s)
         res = {"direction":"top","top":5,"left":10,"result":r} 
         socketio.emit("information", res, broadcast=True)
         time.sleep(300)
