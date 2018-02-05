@@ -6,6 +6,8 @@ import json
 import os
 from computer_vision.camera_api import *
 import pickle
+import time
+
 
 '''
     Click the points in order from 0 to 3 as they appear in the webcam screen.
@@ -46,6 +48,16 @@ for camera_config_settings in capture_objects:
             cv2.putText(frame,str(HOMOGRAPHY_POINT_COUNTER),(x,y), font, 2, (255,255,255),2,cv2.LINE_AA)
             cv2.imshow(window_title, frame)
             HOMOGRAPHY_POINT_COUNTER += 1
+    def draw_text():
+        global points
+        counter = 0
+        for point in points:
+            x, y = point
+            cv2.circle(frame,(x,y),10,(0,255,0),-1)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame,str(counter),(x,y), font, 2, (255,255,255),2,cv2.LINE_AA)
+            cv2.imshow(window_title, frame)
+            counter += 1
 
     # create the windows
     cv2.namedWindow(window_title)
@@ -58,11 +70,17 @@ for camera_config_settings in capture_objects:
     w_size = int(SCREEN_WIDTH/4)
     h_size = int(SCREEN_HEIGHT/4)
 
+    current_time = time.time()
+
     # HOMOGRAPHY CALIBRATION
     while M is None:
 
         k = cv2.waitKey(1) & 0xFF
-
+        if time.time() - current_time > 0.25:
+            current_time = time.time()
+            ret, frame = capture_object.grab_image()
+            draw_text()
+            cv2.imshow(window_title, frame)
         # take picture and restart calibration
         if k == ord("f"):
             print("Taking picture and starting over.")

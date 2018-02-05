@@ -15,8 +15,8 @@ capture_objects = []
 capture_objects_configs = json_settings["camera_settings"]
 for camera_setting in capture_objects_configs:
     capture_objects.append(CameraObject(camera_setting))
+capture_object = capture_objects[0]
 
-capture_object = capture_objects[1]
 def mouse_listener(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         # get transormed point
