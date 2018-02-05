@@ -4,7 +4,7 @@
 // ctx.fillRect(10,10,1000,500);
 
 // setTimeout(update_screen, 3000);
-setInterval(update_screen, 33);
+//setInterval(update_screen, 33);
 // setInterval(update_screen, 3000);
 
 function update_screen() {
