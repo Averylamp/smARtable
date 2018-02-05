@@ -28,13 +28,7 @@ body {
 }
 
 div.callout {
-    height: 60px;
-    width: 200px;
-    float: left;
-}
-
-div.callout {
-	position: absolute;
+    position: absolute;
     background-color: #FFFFFF;
     background-image: -moz-linear-gradient(top, #ececec, #ececec);
     position: relative;

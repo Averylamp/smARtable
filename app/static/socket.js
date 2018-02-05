@@ -1,13 +1,14 @@
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 function display_info(data) {
+	console.log(data);
 	var pointDir = data['direction'];
 	console.log(pointDir);
 	var topOffset = data.top;
 	var leftOffset = data.left;
 	var info = "";
-	$.each(data.data, function(k, v) {
-		info += k + ": " + v + "\n";
+	$.each(data.result, function(k, v) {
+		info += k + ": " + v + "<br />";
 	});
 	$("#callouts").append('<div class="callout ' + pointDir + '" style="top:' + topOffset + 'px; left:' + leftOffset + 'px">' + info + '</div>')
 }

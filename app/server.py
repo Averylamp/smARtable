@@ -1,8 +1,12 @@
 import os, json
 from flask import Flask, render_template, request, jsonify
 from computer_vision.camera_api import *
+from computer_vision.camera_processes import *
 import cv2
 import threading
+import time
+from flask_socketio import SocketIO
+from information import information_class as info
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
@@ -26,6 +30,7 @@ TARGET_SIZE = json_settings["screen_settings"]["target_size"]
 LAST_CLICKED_POSITION = None
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 # this is the main display
 @app.route('/')
@@ -127,9 +132,20 @@ def calibrate():
                             screen_height=SCREEN_HEIGHT,
                             target_size=TARGET_SIZE)
 
+def main_loop():
+    global cameras
+    while True:
+        print("working")
+        socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
+        # only update every X second(s)
+        s = get_item_class(cameras) 
+        r = info.get_product_info(s)
+        res = {"direction":"top","top":5,"left":10,"result":r} 
+        socketio.emit("information", res, broadcast=True)
+        time.sleep(300)
+
 if __name__ == '__main__':
-
+    my_thread = threading.Thread(target=main_loop)
+    my_thread.start()
+    socketio.run(app)
     app.run(debug=False, threaded=True)
-
-
-

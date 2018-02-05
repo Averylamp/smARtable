@@ -1,17 +1,23 @@
+import os, json
 from flask import Flask, render_template, request, jsonify
 from computer_vision.camera_api import *
-from information import information_class as info 
-from flask_socketio import SocketIO
-
-import os, json
 import cv2
 import threading
+import time
+from flask_socketio import SocketIO
+from information import information_class as info 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
 
-camera = CameraObject(json_settings["camera_settings"])
+camera_settings = json_settings["camera_settings"]
+cameras = []
+for camera_setting in camera_settings:
+    cameras.append(CameraObject(camera_setting))
+    # set_background(len(cameras) - 1)
+    print("Camera {} Created ".format(len(cameras)))
+
 
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
@@ -19,18 +25,26 @@ SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
 TARGET_SIZE = json_settings["screen_settings"]["target_size"]
 
 LAST_CLICKED_POSITION = None
-
-app = Flask(__name__)
-socketio = SocketIO(app)
+main_camera = cameras[0]
 
 @socketio.on("connect")
 def connect():
     print("A new client has connected")
 
+app = Flask(__name__)
+socketio = SocketIO(app)
+
 # this is the main display
 @app.route('/')
 def main():
+    global SCREEN_HEIGHT, SCREEN_WIDTH
     return render_template('index.html',
+                            screen_width=SCREEN_WIDTH,
+                            screen_height=SCREEN_HEIGHT)
+@app.route('/blank/')
+def blank_screen():
+    global SCREEN_HEIGHT, SCREEN_WIDTH
+    return render_template('blank_index.html',
                             screen_width=SCREEN_WIDTH,
                             screen_height=SCREEN_HEIGHT)
 
@@ -41,54 +55,69 @@ def calibrate_tester_page():
                             screen_width=SCREEN_WIDTH,
                             screen_height=SCREEN_HEIGHT)
 
-@socketio.on('get_point')
+@app.route('/set_camera/<camera_number>')
+def set_camera(camera_number = 0):
+    global main_camera
+    global cameras
+    main_camera = cameras[camera_number]
+    return "Successful set"
+
+@app.route('/get_point/')
 def get_point():
-    global LAST_CLICKED_POSITION
+    global LAST_CLICKED_POSITION, main_camera, cameras
     if LAST_CLICKED_POSITION is not None:
         point = [LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
         # point = [2,2]
-        point = camera.get_box_of_interest()
+        camera_number = request.args.get('camera_number', 0, type=int)
+        main_camera = cameras[camera_number]
+        point = cameras[camera_number].get_box_of_interest(THRESH=150, KERNEL=(30,30))
+        print("Setting new point with camera {}".format(camera_number))
         if point is None:
             point = [2,2]
-    return emit("get_point", jsonify(result=point))
+    return jsonify(result=point)
 
-@app.route('/set_background')
-def set_background():
-    ret, img = camera.grab_image()
-    cv2.imwrite(dir_path+"/background/{}.png".format(camera.camera_name), img)
-    return emit("set_background", jsonify(result=ret))
+@app.route('/set_backgrounds/')
+def set_all_backgrounds():
+    for i in range(len(cameras)):
+        set_background(i)
+    return "Setting backgrounds success"
 
-@socketio.on('get_screen')
+@app.route('/set_background/<camera_number>')
+def set_background(camera_number = 0):
+    global cameras
+    print("Setting background for camera: {}".format(camera_number))
+    try:
+        ret, img = cameras[camera_number].grab_image()
+        cv2.imwrite(dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name), img)
+        print("Wrote background image to:  " + dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name))
+        return "Wrote background image to:  " + dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name)
+    except:
+        return "Writing new background image failed"
+
+@app.route('/get_screen/')
 def get_screen():
     global LAST_CLICKED_POSITION
     if LAST_CLICKED_POSITION is not None:
         corners = [0,0,LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
         corners = [0,0,0,0]
-    return emit("get_screen", jsonify(result=corners))
+    return jsonify(result=corners)
 
-@app.route("/test")
-def test():
-    x = int(request.args.get('x', 0, type=int))
-    y = int(request.args.get('y', 0, type=int))
-    print(x,y)
-    point = [x,y]
-    data = {"x":x, "y":y}
-    return socketio.emit("message", data, broadcast=True) 
-
-@socketio.on('set_click')
+@app.route('/set_click/')
 def set_click():
     global LAST_CLICKED_POSITION
     x = request.args.get('x', 0, type=int)
     y = request.args.get('y', 0, type=int)
     LAST_CLICKED_POSITION = [x,y]
     print(LAST_CLICKED_POSITION)
-    return emit("set_click", jsonify(result=True))
+    return jsonify(result=True)
+
 
 # calibrate is functional
 @app.route('/calibrate/')
 def calibrate():
+    global SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_SIZE
     # relead on a refresh because this potentially takes fine tuning
     with open(dir_path + "/config/settings.json", "r") as f:
         json_settings = json.load(f)
@@ -103,19 +132,15 @@ def calibrate():
                             screen_height=SCREEN_HEIGHT,
                             target_size=TARGET_SIZE)
 
-def send_item_info(item):
-    emit("information", info.get_product_info(item))
-
-@socketio.on("echo")
-def debug(msg):
-    print(msg)
-    socketio.emit(msg['title'], msg['data'], broadcast=True)
-
-@socketio.on("message")
-def debug(msg):
-    print(msg)
-    socketio.emit("message", msg)
+def main_loop():
+    while True:
+        print("working")
+        socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
+        # only update every X second(s)
+        time.sleep(30)
 
 if __name__ == '__main__':
+    my_thread = threading.Thread(target=main_loop)
+    my_thread.start()
     socketio.run(app)
     app.run(debug=False, threaded=True)
