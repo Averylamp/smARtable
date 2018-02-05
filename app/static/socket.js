@@ -10,6 +10,7 @@ function display_info(data) {
 	$.each(data.result, function(k, v) {
 		info += k + ": " + v + "<br />";
 	});
+	$("#callouts").innerHTML = "";
 	$("#callouts").append('<div class="callout ' + pointDir + '" style="top:' + topOffset + 'px; left:' + leftOffset + 'px">' + info + '</div>')
 }
 
