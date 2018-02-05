@@ -1,6 +1,7 @@
 import os, json
 from flask import Flask, render_template, request, jsonify
 from computer_vision.camera_api import *
+from computer_vision.camera_processes import *
 import cv2
 import threading
 import time
@@ -16,7 +17,6 @@ for camera_setting in camera_settings:
     cameras.append(CameraObject(camera_setting))
     # set_background(len(cameras) - 1)
     print("Camera {} Created ".format(len(cameras)))
-
 
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
