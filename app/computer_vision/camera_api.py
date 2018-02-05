@@ -81,7 +81,7 @@ class CameraObject(object):
         return output
 
     def get_box_of_interest(self, THRESH=10, KERNEL=(30,30)):
-        background = cv2.imread("background/main_camera.png")
+        background = cv2.imread("config/{}/background.png".format(self.camera_name))
         ret, frame = self.grab_image()
 
         difference = np.absolute(np.subtract(frame, background))

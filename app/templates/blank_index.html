@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html width="{{ screen_width }}" height="{{ screen_height }}" >
+<script type=text/javascript src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script type=text/javascript> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; </script>
+
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='calibrate_style.css')}}">
+
+
+<body width="{{ screen_width }}" height="{{ screen_height }}" >
+  <canvas id="myCanvas" width="{{ screen_width }}" height="{{ screen_height }}"></canvas>
+</body>
+
+</html>

@@ -8,7 +8,13 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
 
-camera = CameraObject(json_settings["camera_settings"])
+camera_settings = json_settings["camera_settings"]
+cameras = []
+for camera_setting in camera_settings:
+    cameras.append(CameraObject(camera_setting))
+    # set_background(len(cameras) - 1)
+    print("Camera {} Created ".format(len(cameras)))
+
 
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
@@ -16,13 +22,21 @@ SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
 TARGET_SIZE = json_settings["screen_settings"]["target_size"]
 
 LAST_CLICKED_POSITION = None
+main_camera = cameras[0]
 
 app = Flask(__name__)
 
 # this is the main display
 @app.route('/')
 def main():
+    global SCREEN_HEIGHT, SCREEN_WIDTH
     return render_template('index.html',
+                            screen_width=SCREEN_WIDTH,
+                            screen_height=SCREEN_HEIGHT)
+@app.route('/blank/')
+def blank_screen():
+    global SCREEN_HEIGHT, SCREEN_WIDTH
+    return render_template('blank_index.html',
                             screen_width=SCREEN_WIDTH,
                             screen_height=SCREEN_HEIGHT)
 
@@ -33,24 +47,45 @@ def calibrate_tester_page():
                             screen_width=SCREEN_WIDTH,
                             screen_height=SCREEN_HEIGHT)
 
+@app.route('/set_camera/<camera_number>')
+def set_camera(camera_number = 0):
+    global main_camera
+    global cameras
+    main_camera = cameras[camera_number]
+    return "Successful set"
+
 @app.route('/get_point/')
 def get_point():
-    global LAST_CLICKED_POSITION
+    global LAST_CLICKED_POSITION, main_camera, cameras
     if LAST_CLICKED_POSITION is not None:
         point = [LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
         # point = [2,2]
-        point = camera.get_box_of_interest()
+        camera_number = request.args.get('camera_number', 0, type=int)
+        main_camera = cameras[camera_number]
+        point = cameras[camera_number].get_box_of_interest()
+        print("Setting new point with camera {}".format(camera_number))
         if point is None:
             point = [2,2]
     return jsonify(result=point)
 
-@app.route('/set_background/')
-def set_background():
-    ret, img = camera.grab_image()
-    cv2.imwrite(dir_path+"/background/{}.png".format(camera.camera_name), img)
-    return jsonify(result=ret)
+@app.route('/set_backgrounds/')
+def set_all_backgrounds():
+    for i in range(len(cameras)):
+        set_background(i)
+    return "Setting backgrounds success"
 
+@app.route('/set_background/<camera_number>')
+def set_background(camera_number = 0):
+    global cameras
+    print("Setting background for camera: {}".format(camera_number))
+    try:
+        ret, img = cameras[camera_number].grab_image()
+        cv2.imwrite(dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name), img)
+        print("Wrote background image to:  " + dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name))
+        return "Wrote background image to:  " + dir_path+"/config/{}/background.png".format(cameras[camera_number].camera_name)
+    except:
+        return "Writing new background image failed"
 
 @app.route('/get_screen/')
 def get_screen():
@@ -74,6 +109,7 @@ def set_click():
 # calibrate is functional
 @app.route('/calibrate/')
 def calibrate():
+    global SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_SIZE
     # relead on a refresh because this potentially takes fine tuning
     with open(dir_path + "/config/settings.json", "r") as f:
         json_settings = json.load(f)
@@ -89,4 +125,8 @@ def calibrate():
                             target_size=TARGET_SIZE)
 
 if __name__ == '__main__':
+
     app.run(debug=False, threaded=True)
+
+
+
