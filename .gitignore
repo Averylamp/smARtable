@@ -5,3 +5,6 @@
 .DS_Store
 .swo
 .swp
+notebooks/*
+config/settings.json
+config/camera*/*
