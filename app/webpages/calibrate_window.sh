@@ -1,1 +1,7 @@
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:5000/calibrate/
+#!/bin/bash 
+if [[ "$OSTYPE" != 'linux-gnu' ]]; then
+    /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:5000/calibrate/
+fi
+if [[ "$OSTYPE" == 'linux-gnu' ]]; then
+    google-chrome http://localhost:5000/calibrate/ 
+fi
