@@ -11,13 +11,16 @@ from information import information_class as info
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
-
-camera_settings = json_settings["camera_settings"]
-cameras = []
-for camera_setting in camera_settings:
-    cameras.append(CameraObject(camera_setting))
-    # set_background(len(cameras) - 1)
-    print("Camera {} Created ".format(len(cameras)))
+initialize_cameras = False
+if initialize_cameras:
+    camera_settings = json_settings["camera_settings"]
+    cameras = []
+    for camera_setting in camera_settings:
+        cameras.append(CameraObject(camera_setting))
+        # set_background(len(cameras) - 1)
+        print("Camera {} Created ".format(len(cameras)))
+    
+    main_camera = cameras[0]
 
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
@@ -25,7 +28,6 @@ SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
 TARGET_SIZE = json_settings["screen_settings"]["target_size"]
 
 LAST_CLICKED_POSITION = None
-main_camera = cameras[0]
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -65,10 +67,12 @@ def get_point():
         point = [LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
         # point = [2,2]
-        camera_number = request.args.get('camera_number', 0, type=int)
-        main_camera = cameras[camera_number]
-        point = cameras[camera_number].get_box_of_interest(THRESH=150, KERNEL=(30,30))
-        print("Setting new point with camera {}".format(camera_number))
+        global initialize_cameras
+        if initialize_cameras:
+            camera_number = request.args.get('camera_number', 0, type=int)
+            main_camera = cameras[camera_number]
+            point = cameras[camera_number].get_box_of_interest()
+            print("Setting new point with camera {}".format(camera_number))
         if point is None:
             point = [2,2]
     return jsonify(result=point)
