@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, jsonify
 from computer_vision.camera_api import *
 import cv2
 import threading
+import time
+from flask_socketio import SocketIO
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
@@ -25,6 +27,7 @@ LAST_CLICKED_POSITION = None
 main_camera = cameras[0]
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 # this is the main display
 @app.route('/')
@@ -63,7 +66,7 @@ def get_point():
         # point = [2,2]
         camera_number = request.args.get('camera_number', 0, type=int)
         main_camera = cameras[camera_number]
-        point = cameras[camera_number].get_box_of_interest()
+        point = cameras[camera_number].get_box_of_interest(THRESH=150, KERNEL=(30,30))
         print("Setting new point with camera {}".format(camera_number))
         if point is None:
             point = [2,2]
@@ -124,9 +127,15 @@ def calibrate():
                             screen_height=SCREEN_HEIGHT,
                             target_size=TARGET_SIZE)
 
+def main_loop():
+    while True:
+        print("working")
+        # socketio.emit(msg['title'], msg['data'], broadcast=True)
+        # only update every X second(s)
+        time.sleep(1)
+
 if __name__ == '__main__':
-
+    my_thread = threading.Thread(target=main_loop)
+    my_thread.start()
+    socketio.run(app)
     app.run(debug=False, threaded=True)
-
-
-

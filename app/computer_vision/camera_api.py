@@ -85,7 +85,7 @@ class CameraObject(object):
                     output[i][j] = 0
         return output
 
-    def get_box_of_interest(self, THRESH=10, KERNEL=(30,30)):
+    def get_box_of_interest(self, THRESH=100, KERNEL=(30,30)):
         background = cv2.imread("config/{}/background.png".format(self.camera_name))
         ret, frame = self.grab_image()
 
@@ -94,6 +94,7 @@ class CameraObject(object):
         # filter the image
         kernel = np.ones(KERNEL,np.uint8)
         filtered = cv2.erode(difference,kernel,iterations=1)
+        kernel = np.ones(KERNEL,np.uint8)
         filtered = cv2.dilate(filtered,kernel,iterations=1)
 
         # convert to grayscale
@@ -103,7 +104,7 @@ class CameraObject(object):
         filtered = np.where(np.logical_and(0<=filtered, filtered<=THRESH), 0, filtered)
         filtered = np.where(np.logical_and(THRESH<filtered, filtered<=255), 255, filtered)
 
-        cv2.imwrite("detections/output.png", filtered)
+        cv2.imwrite("config/{}/filtered.png".format(self.camera_name), filtered)
 
         im2, contours, hierarchy = cv2.findContours(filtered,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
@@ -151,11 +152,11 @@ class CameraObject(object):
             center = (x+w//2,y+h//2)
 
             # draw a green rectangle and blue circle
-            # expansion = 20
-            # cv2.rectangle(frame, (x-expansion, y-expansion), (x+w+expansion, y+h+expansion), (0, 255, 0), 2)
-            # radius = 5
-            # cv2.circle(frame, center, radius, (255, 0, 0), 10)
-            # cv2.imwrite("detections/output.png", frame)
+            expansion = 20
+            cv2.rectangle(frame, (x-expansion, y-expansion), (x+w+expansion, y+h+expansion), (0, 255, 0), 2)
+            radius = 5
+            cv2.circle(frame, center, radius, (255, 0, 0), 10)
+            cv2.imwrite("config/{}/current_frame.png".format(self.camera_name), frame)
 
             return self.get_transformed_point(center[0], center[1])
         else:
