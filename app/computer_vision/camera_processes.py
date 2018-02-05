@@ -1,5 +1,6 @@
 from computer_vision.vision import *
 import cv2
+import math
 
 # this function is used to compute the best point from
 def filter_best_point(camera_objects, THRESH=150, KERNEL=(30,30)):
@@ -19,8 +20,10 @@ def filter_best_point(camera_objects, THRESH=150, KERNEL=(30,30)):
             num_points += 1.0
             x_average += point[0]
             y_average += point[1]
-    x_average /= point_num
-    y_average /= point_num
+    if num_points == 0:
+        return None
+    x_average /= num_points
+    y_average /= num_points
     return (math.floor(x_average), math.floor(y_average))
 
 def get_item_class(camera_objects):

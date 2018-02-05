@@ -13,7 +13,6 @@ def get_product_info(name):
     results = sem3.get()
     res = results['results']
     r = sorted(res, key=lambda s: -s['updated_at'])[0]
-    pprint(r)
     j = {}
     j['name'] = r['name']
     j['price'] = r['price']

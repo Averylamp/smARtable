@@ -59,7 +59,7 @@ def get_google_analysis(image_filename):
     data = open(output_filename, 'rb').read()
 
     response = requests.post(url='https://vision.googleapis.com/v1/images:annotate?key=AIzaSyBgalC41vkCLty97Je2bmgd9nXH8GeIyJA', data=data, headers={'Content-Type': 'application/json'})
-    
+
     response_json = response.json()["responses"][0]
     results = {}
 
@@ -78,7 +78,7 @@ def get_google_analysis(image_filename):
     best_guess = ""
     items = set()
 
-    if "labelAnnotations" in response_json:    
+    if "labelAnnotations" in response_json:
         entities = list(functools.reduce(lambda a, b: a + b ,map(lambda x: x.get("description").lower().split(" "), filter(lambda d: "description" in d, response_json["labelAnnotations"]))))
         items.update(entities)
         best_guess = response_json["labelAnnotations"][0]["description"]
@@ -97,7 +97,3 @@ def get_google_analysis(image_filename):
 
 
 # result = get_google_analysis("coffee.jpg")
-
-
-
-

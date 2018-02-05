@@ -132,13 +132,17 @@ def main_loop():
     global cameras
     while True:
         print("working")
-        socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
+        # point = filter_best_point(cameras, THRESH=150, KERNEL=(30,30))
+        point = cameras[0].get_box_of_interest(THRESH=150, KERNEL=(30,30))
+        if point is not None:
+            socketio.emit("get_point", {"result":[point[0],point[1]]}, broadcast=True)
+            print(point)
         # only update every X second(s)
-        s = get_item_class(cameras) 
-        r = info.get_product_info(s)
-        res = {"direction":"top","top":5,"left":10,"result":r} 
-        socketio.emit("information", res, broadcast=True)
-        time.sleep(300)
+        # s = get_item_class(cameras)
+        # r = info.get_product_info(s)
+        # res = {"direction":"top","top":5,"left":10,"result":r}
+        # socketio.emit("information", res, broadcast=True)
+        time.sleep(1)
 
 if __name__ == '__main__':
     my_thread = threading.Thread(target=main_loop)
