@@ -8,16 +8,23 @@ import time
 from flask_socketio import SocketIO
 from information import information_class as info
 
+from gevent import monkey
+monkey.patch_all()
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
 
-camera_settings = json_settings["camera_settings"]
-cameras = []
-for camera_setting in camera_settings:
-    cameras.append(CameraObject(camera_setting))
-    # set_background(len(cameras) - 1)
-    print("Camera {} Created ".format(len(cameras)))
+initialize_cameras = True
+if initialize_cameras:
+    camera_settings = json_settings["camera_settings"]
+    cameras = []
+    for camera_setting in camera_settings:
+        cameras.append(CameraObject(camera_setting))
+        # set_background(len(cameras) - 1)
+        print("Camera {} Created ".format(len(cameras)))
+
+    main_camera = cameras[0]
 
 # get the screen height and width
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
@@ -25,7 +32,6 @@ SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
 TARGET_SIZE = json_settings["screen_settings"]["target_size"]
 
 LAST_CLICKED_POSITION = None
-main_camera = cameras[0]
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -65,10 +71,12 @@ def get_point():
         point = [LAST_CLICKED_POSITION[0],LAST_CLICKED_POSITION[1]]
     else:
         # point = [2,2]
-        camera_number = request.args.get('camera_number', 0, type=int)
-        main_camera = cameras[camera_number]
-        point = cameras[camera_number].get_box_of_interest(THRESH=150, KERNEL=(30,30))
-        print("Setting new point with camera {}".format(camera_number))
+        global initialize_cameras
+        if initialize_cameras:
+            camera_number = request.args.get('camera_number', 0, type=int)
+            main_camera = cameras[camera_number]
+            point = cameras[camera_number].get_box_of_interest()
+            print("Setting new point with camera {}".format(camera_number))
         if point is None:
             point = [2,2]
     return jsonify(result=point)
@@ -132,13 +140,17 @@ def main_loop():
     global cameras
     while True:
         print("working")
-        socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
+        point = filter_best_point(cameras, THRESH=150, KERNEL=(30,30))
+        # point = cameras[0].get_box_of_interest(THRESH=100, KERNEL=(30,30))
+        if point is not None:
+            socketio.emit("get_point", {"result":[point[0],point[1]]}, broadcast=True)
+            print(point)
         # only update every X second(s)
-        s = get_item_class(cameras) 
-        r = info.get_product_info(s)
-        res = {"direction":"top","top":5,"left":10,"result":r} 
-        socketio.emit("information", res, broadcast=True)
-        time.sleep(300)
+        # s = get_item_class(cameras)
+        # r = info.get_product_info(s)
+        # res = {"direction":"top","top":5,"left":10,"result":r}
+        # socketio.emit("information", res, broadcast=True)
+        time.sleep(1)
 
 if __name__ == '__main__':
     my_thread = threading.Thread(target=main_loop)
