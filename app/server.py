@@ -6,6 +6,7 @@ import cv2
 import threading
 import time
 from flask_socketio import SocketIO
+from information import information_class as info
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
@@ -130,9 +131,12 @@ def calibrate():
 def main_loop():
     while True:
         print("working")
-        # socketio.emit(msg['title'], msg['data'], broadcast=True)
+        socketio.emit("get_point", {"result":[500,100]}, broadcast=True)
         # only update every X second(s)
-        time.sleep(1)
+        r = info.get_product_info("hot cheetos")
+        res = {"direction":"top","top":5,"left":10,"result":r} 
+        socketio.emit("information", res, broadcast=True)
+        time.sleep(300)
 
 if __name__ == '__main__':
     my_thread = threading.Thread(target=main_loop)

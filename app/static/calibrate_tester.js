@@ -1,5 +1,5 @@
 // setInterval(update_screen, 33);
-setInterval(update_screen, 1000);
+//setInterval(update_screen, 1000);
 
 function update_screen() {
   $.getJSON($SCRIPT_ROOT + '/get_point', {
