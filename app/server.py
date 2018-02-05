@@ -8,10 +8,14 @@ import time
 from flask_socketio import SocketIO
 from information import information_class as info
 
+from gevent import monkey
+monkey.patch_all()
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
-initialize_cameras = False
+
+initialize_cameras = True
 if initialize_cameras:
     camera_settings = json_settings["camera_settings"]
     cameras = []
@@ -19,7 +23,7 @@ if initialize_cameras:
         cameras.append(CameraObject(camera_setting))
         # set_background(len(cameras) - 1)
         print("Camera {} Created ".format(len(cameras)))
-    
+
     main_camera = cameras[0]
 
 # get the screen height and width
@@ -136,8 +140,8 @@ def main_loop():
     global cameras
     while True:
         print("working")
-        # point = filter_best_point(cameras, THRESH=150, KERNEL=(30,30))
-        point = cameras[0].get_box_of_interest(THRESH=150, KERNEL=(30,30))
+        point = filter_best_point(cameras, THRESH=150, KERNEL=(30,30))
+        # point = cameras[0].get_box_of_interest(THRESH=100, KERNEL=(30,30))
         if point is not None:
             socketio.emit("get_point", {"result":[point[0],point[1]]}, broadcast=True)
             print(point)
