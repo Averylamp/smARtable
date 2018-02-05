@@ -9,7 +9,7 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class CameraObject(object):
-    def __init__(self, camera_settings):
+    def __init__(self, camera_settings, SCREEN_WIDTH = 1920, SCREEN_HEIGHT = 1080):
 
         self.cap_index = camera_settings['camera_index']
         self.cap = cv2.VideoCapture(self.cap_index)
@@ -34,10 +34,14 @@ class CameraObject(object):
         self.mask = np.zeros((len(frame),len(frame[0])), dtype=np.uint8) # height, width
         corners = []
         corners.append(self.get_inv_transformed_point(0,0))
-        corners.append(self.get_inv_transformed_point(1360,0))
-        corners.append(self.get_inv_transformed_point(1360,768))
-        corners.append(self.get_inv_transformed_point(0,768))
+        corners.append(self.get_inv_transformed_point(SCREEN_WIDTH,0))
+        corners.append(self.get_inv_transformed_point(SCREEN_WIDTH,SCREEN_HEIGHT))
+        corners.append(self.get_inv_transformed_point(0,SCREEN_HEIGHT))
         cv2.fillConvexPoly(self.mask, np.array(corners, np.int32), 255)
+
+        self.SCREEN_WIDTH = SCREEN_WIDTH
+        self.SCREEN_HEIGHT = SCREEN_HEIGHT
+
         self.mask = self.mask.astype(np.uint8)
 
 
@@ -54,7 +58,8 @@ class CameraObject(object):
         return (math.floor(new_x), math.floor(new_y))
 
     def grab_image(self):
-        return self.cap.read()
+        ret, img = self.cap.read()
+        return (ret, img)
 
     def release(self):
         self.cap.release()
@@ -119,7 +124,7 @@ class CameraObject(object):
 
             # make sure it isn't off the screen
             for corner in corners:
-                if corner[0] < 0 or corner[0] > 1360 or corner[1] < 0 or corner[1] > 768:
+                if corner[0] < 0 or corner[0] > self.SCREEN_WIDTH or corner[1] < 0 or corner[1] > self.SCREEN_HEIGHT:
                     valid_corners = False
                     break
 

@@ -48,8 +48,8 @@ while True:
         if event == cv2.EVENT_LBUTTONDOWN:
             # get transormed point
             new_x, new_y = capture_object.get_transformed_point(x, y)
-            print("Original (x,y): ({},{})".format(x,y))
-            print("New (x,y): ({},{})".format(new_x,new_y))
+            # print("Original (x,y): ({},{})".format(x,y))
+            # print("New (x,y): ({},{})".format(new_x,new_y))
             r = requests.get("http://localhost:5000/set_click?x={}&y={}&camera_number={}".format(new_x,new_y, capture_objects.index(capture_object)))
 
     # take picture and restart calibration

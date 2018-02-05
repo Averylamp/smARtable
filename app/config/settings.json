@@ -1,7 +1,7 @@
 {
     "screen_settings": {
-        "width": 1360,
-        "height": 768,
+        "width": 1920,
+        "height": 1080,
         "target_size": 100
     },
     "camera_settings": [
@@ -13,8 +13,8 @@
             "homography_file": "config/camera0/homography.p",
             "inv_homography_file": "config/camera0/inv_homography.p",
             "background_subtract": "computer_vision/background.png",
-            "desired_width": 960,
-            "desired_height": 540
+            "desired_width": 1024,
+            "desired_height": 768
         },
         {
             "_comment": "automatic 0 = clicking points manually; 1 = automated",
@@ -24,8 +24,8 @@
             "homography_file": "config/camera1/homography.p",
             "inv_homography_file": "config/camera1/inv_homography.p",
             "background_subtract": "computer_vision/background.png",
-            "desired_width": 960,
-            "desired_height": 540
+            "desired_width": 1024,
+            "desired_height": 768
         }
     ],
     "title": "smARtable"
