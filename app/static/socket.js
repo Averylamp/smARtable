@@ -8,7 +8,7 @@ function display_info(data) {
 	var leftOffset = data.left;
 	var info = "";
 	$.each(data.result, function(k, v) {
-		info += k + ": " + v + "\n";
+		info += k + ": " + v + "<br />";
 	});
 	$("#callouts").append('<div class="callout ' + pointDir + '" style="top:' + topOffset + 'px; left:' + leftOffset + 'px">' + info + '</div>')
 }
