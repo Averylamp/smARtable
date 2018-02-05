@@ -2,7 +2,7 @@
 setInterval(update_screen, 1000);
 
 function update_screen() {
-  $.getJSON($SCRIPT_ROOT + '/get_point', {
+  socket.emit('get_point', {
   }, function(data) {
     var point = data.result;
     if (point[0] != -1) {
