@@ -15,17 +15,6 @@
             "background_subtract": "computer_vision/background.png",
             "desired_width": 1024,
             "desired_height": 768
-        },
-        {
-            "_comment": "automatic 0 = clicking points manually; 1 = automated",
-            "automatic": 0,
-            "camera_index": 2,
-            "camera_name": "camera1",
-            "homography_file": "config/camera1/homography.p",
-            "inv_homography_file": "config/camera1/inv_homography.p",
-            "background_subtract": "computer_vision/background.png",
-            "desired_width": 1024,
-            "desired_height": 768
         }
     ],
     "title": "smARtable"
