@@ -125,6 +125,7 @@ class CameraObject(object):
 
             # make sure it isn't off the screen
             for corner in corners:
+            # for corner in (corners[1], corners[3]):
                 if corner[0] < 0 or corner[0] > self.SCREEN_WIDTH or corner[1] < 0 or corner[1] > self.SCREEN_HEIGHT:
                     valid_corners = False
                     break

@@ -10,6 +10,7 @@ ret = cap.set(4,540); # height
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
+    print("HEIGHT: {}, WIDTH: {}".format(len(frame), len(frame[0])))
     cv2.imshow('original', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

@@ -8,8 +8,8 @@ import time
 from flask_socketio import SocketIO
 from information import information_class as info
 
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
@@ -30,6 +30,8 @@ if initialize_cameras:
 SCREEN_WIDTH = json_settings["screen_settings"]["width"]
 SCREEN_HEIGHT = json_settings["screen_settings"]["height"]
 TARGET_SIZE = json_settings["screen_settings"]["target_size"]
+
+HARDCODED_OBJECTS = json_settings["objects"]
 
 LAST_CLICKED_POSITION = None
 
@@ -139,18 +141,26 @@ def calibrate():
 def main_loop():
     global cameras
     while True:
-        print("working")
-        point = filter_best_point(cameras, THRESH=150, KERNEL=(30,30))
-        # point = cameras[0].get_box_of_interest(THRESH=100, KERNEL=(30,30))
+        # point = filter_best_point(cameras, THRESH=100, KERNEL=(30,30))
+        point = cameras[0].get_box_of_interest(THRESH=50, KERNEL=(30,30))
         if point is not None:
             socketio.emit("get_point", {"result":[point[0],point[1]]}, broadcast=True)
             print(point)
-        # only update every X second(s)
-        # s = get_item_class(cameras)
-        # r = info.get_product_info(s)
-        # res = {"direction":"top","top":5,"left":10,"result":r}
-        # socketio.emit("information", res, broadcast=True)
-        time.sleep(1)
+
+        r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
+        res = {"direction":"top","top":5,"left":10,"result":r}
+        socketio.emit("information", res, broadcast=True)
+
+        # if loop_num % 5 == 0:
+        #     # only update every X second(s)
+        #     # s = get_item_class(cameras)
+        #     s = "chips"
+        #     #r = info.get_product_info(s)
+        #     r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
+        #     res = {"direction":"top","top":5,"left":10,"result":r}
+        #     socketio.emit("information", res, broadcast=True)
+
+        time.sleep(.5)
 
 if __name__ == '__main__':
     my_thread = threading.Thread(target=main_loop)

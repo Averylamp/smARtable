@@ -15,8 +15,8 @@
             "background_subtract": "computer_vision/background.png",
             "desired_width": 1024,
             "desired_height": 768
-          },
-          {
+        },
+        {
             "_comment": "automatic 0 = clicking points manually; 1 = automated",
             "automatic": 0,
             "camera_index": 2,
@@ -28,5 +28,11 @@
             "desired_height": 768
         }
     ],
-    "title": "smARtable"
+    "title": "smARtable",
+    "objects": [
+      {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"},
+      {"Item": "Sandwich", "Price": "Free", "Owner": "Moin"},
+      {"Item": "Burrito", "Price": "Free", "Owner": "Ethan"},
+      {"Item": "Pizza", "Price": "Free", "Owner": "Matthew"}
+    ]
 }

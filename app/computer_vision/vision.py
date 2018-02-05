@@ -96,4 +96,5 @@ def get_google_analysis(image_filename):
     return results
 
 
-# result = get_google_analysis("coffee.jpg")
+# result = get_google_analysis("water-bottle.jpg")
+# print(result)
