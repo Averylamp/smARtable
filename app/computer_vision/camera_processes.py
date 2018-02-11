@@ -1,5 +1,7 @@
 from computer_vision.vision import *
 import cv2
+import cv2.aruco as aruco
+import numpy as np
 import math
 
 # this function is used to compute the best point from
@@ -35,3 +37,25 @@ def get_item_class(camera_objects):
     best = result["best_guess"]
     print("Best Guess: {}".format(best))
     return best
+
+
+def aruco_filtered_best_point(camera_objects):
+    points = []
+    for camera_object in camera_objects:
+
+        ret, frame = camera_object.grab_image()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
+        parameters =  cv2.aruco.DetectorParameters_create()
+
+        corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+
+        if corners != []:
+            lowest_point = [0,0]
+            for aruco_marker in corners[0]:
+                for point in aruco_marker:
+                    if point[1] > lowest_point[1]:
+                        lowest_point = (math.floor(point[0]), math.floor(point[1]))
+            return camera_object.get_transformed_point(lowest_point[0], lowest_point[1])
+    return None
