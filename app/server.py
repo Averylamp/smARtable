@@ -1,5 +1,6 @@
 import os, json
 from flask import Flask, render_template, request, jsonify
+import cv2.aruco as aruco
 from computer_vision.camera_api import *
 from computer_vision.camera_processes import *
 import cv2
@@ -15,7 +16,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(dir_path + "/config/settings.json", "r") as f:
     json_settings = json.load(f)
 
-initialize_cameras = False
+initialize_cameras = True
 if initialize_cameras:
     camera_settings = json_settings["camera_settings"]
     cameras = []
@@ -153,59 +154,62 @@ def main_loop():
     while True:
         # point = filter_best_point(cameras, THRESH=100, KERNEL=(30,30))
         if initialize_cameras:
-            point = cameras[0].get_box_of_interest(THRESH=50, KERNEL=(30,30))
+            point = aruco_filtered_best_point(cameras)
+            if point is not None:
+                detail_text = []
+                detail_text.append("Product Category: Chips")
+                detail_text.append("Price: $1.00")
+                detail_text.append("Store: La Verdes")
+                item = create_item("Doritos Nacho Cheese", point, detail_text, "static/images/doritos.jpg", "")
+                socketio.emit("information", item, broadcast=True)
+                # socketio.emit("get_point", {"result":[200,400]}, broadcast=True)
+                print("Sending information")
 
-        # if point is not None:
-            # socketio.emit("get_point", {"result":[point[0],point[1]]}, broadcast=True)
-            # print(point)
 
-        # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
-        # res = {"direction":"top","top":5,"left":10,"result":r}
-        # socketio.emit("information", res, broadcast=True)
 
-        if loop_num % 30 == 0:
-            # only update every X second(s)
-            # s = get_item_class(cameras)
-            s = "chips"
-            #r = info.get_product_info(s)
-            # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
-            detail_text = []
-            detail_text.append("Product Category: Chips")
-            detail_text.append("Price: $1.00")
-            detail_text.append("Store: La Verdes")
-            item = create_item("Doritos Nacho Cheese", [200,400], detail_text, "static/images/doritos.jpg", "")
-            socketio.emit("information", item, broadcast=True)
-            # socketio.emit("get_point", {"result":[200,400]}, broadcast=True)
-            print("Sending information")
-        elif loop_num % 30 == 10:
-            # s = "chips"
-            #r = info.get_product_info(s)
-            # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
-            # res = {"direction":"top","top":5,"left":10,"result":r}
-            # socketio.emit("get_point", {"result":[1000,600]}, broadcast=True)
-            # socketio.emit("information", res, broadcast=True)
-            detail_text = []
-            detail_text.append("Product Category: Chips")
-            detail_text.append("Price: $1.00")
-            detail_text.append("Store: La Verdes")
-            item = create_item("Doritos Nacho Cheese", [1000,600], detail_text, "static/images/doritos.jpg", "")
-            socketio.emit("information", item, broadcast=True)
-            print("Sending information")
-        elif loop_num % 30 == 20:
-            # s = "chips"
-            #r = info.get_product_info(s)
-            # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
-            # res = {"direction":"top","top":5,"left":10,"result":r}
-            # socketio.emit("get_point", {"result":[1200,900]}, broadcast=True)
-            # socketio.emit("information", res, broadcast=True)
-            detail_text = []
-            detail_text.append("Product Category: Chips")
-            detail_text.append("Price: $1.00")
-            detail_text.append("Store: La Verdes")
-            item = create_item("Doritos Nacho Cheese", [1200,900], detail_text, "static/images/doritos.jpg", "")
-            socketio.emit("information", item, broadcast=True)
-            print("Sending information")
-        time.sleep(.5)
+        # if loop_num % 30 == 0:
+        #     # only update every X second(s)
+        #     # s = get_item_class(cameras)
+        #     # s = "chips"
+        #     #r = info.get_product_info(s)
+        #     # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
+        #     detail_text = []
+        #     detail_text.append("Product Category: Chips")
+        #     detail_text.append("Price: $1.00")
+        #     detail_text.append("Store: La Verdes")
+        #     item = create_item("Doritos Nacho Cheese", [200,400], detail_text, "static/images/doritos.jpg", "")
+        #     socketio.emit("information", item, broadcast=True)
+        #     # socketio.emit("get_point", {"result":[200,400]}, broadcast=True)
+        #     print("Sending information")
+        # elif loop_num % 30 == 10:
+        #     # s = "chips"
+        #     #r = info.get_product_info(s)
+        #     # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
+        #     # res = {"direction":"top","top":5,"left":10,"result":r}
+        #     # socketio.emit("get_point", {"result":[1000,600]}, broadcast=True)
+        #     # socketio.emit("information", res, broadcast=True)
+        #     detail_text = []
+        #     detail_text.append("Product Category: Chips")
+        #     detail_text.append("Price: $1.00")
+        #     detail_text.append("Store: La Verdes")
+        #     item = create_item("Doritos Nacho Cheese", [1000,600], detail_text, "static/images/doritos.jpg", "")
+        #     socketio.emit("information", item, broadcast=True)
+        #     print("Sending information")
+        # elif loop_num % 30 == 20:
+        #     # s = "chips"
+        #     #r = info.get_product_info(s)
+        #     # r = {"Item": "Doritos Nacho Cheese", "Price": "Free", "Owner": "Avery"}
+        #     # res = {"direction":"top","top":5,"left":10,"result":r}
+        #     # socketio.emit("get_point", {"result":[1200,900]}, broadcast=True)
+        #     # socketio.emit("information", res, broadcast=True)
+        #     detail_text = []
+        #     detail_text.append("Product Category: Chips")
+        #     detail_text.append("Price: $1.00")
+        #     detail_text.append("Store: La Verdes")
+        #     item = create_item("Doritos Nacho Cheese", [1200,900], detail_text, "static/images/doritos.jpg", "")
+        #     socketio.emit("information", item, broadcast=True)
+        #     print("Sending information")
+        time.sleep(0.1)
         loop_num += 1
 
 if __name__ == '__main__':

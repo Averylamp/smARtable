@@ -52,10 +52,10 @@ def aruco_filtered_best_point(camera_objects):
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 
         if corners != []:
-            lowest_point = [0,0]
+            lowest_point = [1000,1000]
             for aruco_marker in corners[0]:
                 for point in aruco_marker:
-                    if point[1] > lowest_point[1]:
+                    if point[1] < lowest_point[1]:
                         lowest_point = (math.floor(point[0]), math.floor(point[1]))
             return camera_object.get_transformed_point(lowest_point[0], lowest_point[1])
     return None

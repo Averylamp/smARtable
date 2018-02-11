@@ -8,7 +8,7 @@
         {
             "_comment": "automatic 0 = clicking points manually; 1 = automated",
             "automatic": 0,
-            "camera_index": 0,
+            "camera_index": 1,
             "camera_name": "camera0",
             "homography_file": "config/camera0/homography.p",
             "inv_homography_file": "config/camera0/inv_homography.p",
